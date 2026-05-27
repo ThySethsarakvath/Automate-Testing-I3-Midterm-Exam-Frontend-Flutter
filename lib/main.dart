@@ -30,16 +30,16 @@ final _router = GoRouter(
     return null;
   },
   routes: [
-    GoRoute(path: '/', builder: (_, __) => const SplashScreen()),
-    GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
-    GoRoute(path: '/register', builder: (_, __) => const RegisterScreen()),
-    GoRoute(path: '/feed', builder: (_, __) => const FeedScreen()),
+    GoRoute(path: '/', builder: (_, _) => const SplashScreen()),
+    GoRoute(path: '/login', builder: (_, _) => const LoginScreen()),
+    GoRoute(path: '/register', builder: (_, _) => const RegisterScreen()),
+    GoRoute(path: '/feed', builder: (_, _) => const FeedScreen()),
     GoRoute(
       path: '/posts/:id',
       builder: (_, state) =>
           PostDetailScreen(postId: state.pathParameters['id']!),
     ),
-    GoRoute(path: '/create', builder: (_, __) => const CreatePostScreen()),
+    GoRoute(path: '/create', builder: (_, _) => const CreatePostScreen()),
     GoRoute(
       path: '/edit/:id',
       builder: (_, state) =>

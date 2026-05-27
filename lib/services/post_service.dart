@@ -112,8 +112,9 @@ class PostService {
       Uri.parse('${ApiConfig.posts}/$id/like'),
       headers: headers,
     );
-    if (response.statusCode == 200)
+    if (response.statusCode == 200) {
       return Post.fromJson(jsonDecode(response.body));
+    }
     throw Exception('Failed to like post');
   }
 
@@ -123,8 +124,9 @@ class PostService {
       Uri.parse('${ApiConfig.posts}/$id/like'),
       headers: headers,
     );
-    if (response.statusCode == 200)
+    if (response.statusCode == 200) {
       return Post.fromJson(jsonDecode(response.body));
+    }
     throw Exception('Failed to unlike post');
   }
 
