@@ -5,21 +5,21 @@ import '../services/auth_service.dart';
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
 
-  User?   _user;
+  User? _user;
   String? _token;
-  bool    _isLoading = false;
+  bool _isLoading = false;
   String? _error;
 
-  User?   get user      => _user;
-  String? get token     => _token;
-  bool    get isLoading => _isLoading;
-  String? get error     => _error;
-  bool    get isLoggedIn => _token != null;
+  User? get user => _user;
+  String? get token => _token;
+  bool get isLoading => _isLoading;
+  String? get error => _error;
+  bool get isLoggedIn => _token != null;
   AuthService get authService => _authService;
 
   // Called on app start to restore session
   Future<void> init() async {
-    _user  = await _authService.getStoredUser();
+    _user = await _authService.getStoredUser();
     _token = await _authService.getToken();
     notifyListeners();
   }
@@ -33,12 +33,14 @@ class AuthProvider extends ChangeNotifier {
     _error = null; // Clear previous errors
     try {
       final result = await _authService.register(
-        username: username, email: email, password: password,
+        username: username,
+        email: email,
+        password: password,
       );
       _setLoading(false);
 
       if (result['success']) {
-        _user  = User.fromJson(result['data']['user']);
+        _user = User.fromJson(result['data']['user']);
         _token = result['data']['accessToken'];
         _error = null;
         notifyListeners();
@@ -56,16 +58,13 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> login({
-    required String email,
-    required String password,
-  }) async {
+  Future<bool> login({required String email, required String password}) async {
     _setLoading(true);
     final result = await _authService.login(email: email, password: password);
     _setLoading(false);
 
     if (result['success']) {
-      _user  = User.fromJson(result['data']['user']);
+      _user = User.fromJson(result['data']['user']);
       _token = result['data']['accessToken'];
       _error = null;
       notifyListeners();
@@ -79,7 +78,7 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> logout() async {
     await _authService.logout();
-    _user  = null;
+    _user = null;
     _token = null;
     _error = null;
     notifyListeners();

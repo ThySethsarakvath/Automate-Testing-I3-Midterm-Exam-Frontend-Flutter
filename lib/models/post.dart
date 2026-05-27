@@ -13,10 +13,10 @@ class Comment {
 
   factory Comment.fromJson(Map<String, dynamic> json) {
     return Comment(
-      id:             json['id'] ?? '',
-      authorId:       json['authorId'] ?? '',
+      id: json['id'] ?? '',
+      authorId: json['authorId'] ?? '',
       authorUsername: json['authorUsername'] ?? '',
-      content:        json['content'] ?? '',
+      content: json['content'] ?? '',
     );
   }
 }
@@ -46,17 +46,17 @@ class Post {
 
   factory Post.fromJson(Map<String, dynamic> json) {
     return Post(
-      id:             json['id'] ?? '',
-      authorId:       json['authorId'] ?? '',
+      id: json['id'] ?? '',
+      authorId: json['authorId'] ?? '',
       authorUsername: json['authorUsername'] ?? '',
-      title:          json['title'] ?? '',
-      content:        json['content'] ?? '',
-      tags:           List<String>.from(json['tags'] ?? []),
-      likes:          List<String>.from(json['likes'] ?? []),
-      comments:       (json['comments'] as List<dynamic>? ?? [])
-                          .map((c) => Comment.fromJson(c))
-                          .toList(),
-      createdAt:      DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
+      title: json['title'] ?? '',
+      content: json['content'] ?? '',
+      tags: List<String>.from(json['tags'] ?? []),
+      likes: List<String>.from(json['likes'] ?? []),
+      comments: (json['comments'] as List<dynamic>? ?? [])
+          .map((c) => Comment.fromJson(c))
+          .toList(),
+      createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
     );
   }
 

@@ -7,18 +7,19 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('Posts CRUD UI Tests', () {
-
     testWidgets('Feed screen loads with post list', (tester) async {
       await launchApp(tester);
       await registerAndLogin(tester);
       await tester.pumpAndSettle(const Duration(seconds: 2));
       // Either posts or empty message shown
       final hasPosts = tester.any(find.byKey(const Key('postsList')));
-      final isEmpty  = tester.any(find.byKey(const Key('emptyFeed')));
+      final isEmpty = tester.any(find.byKey(const Key('emptyFeed')));
       expect(hasPosts || isEmpty, isTrue);
     });
 
-    testWidgets('Create Post — shows validation on empty title', (tester) async {
+    testWidgets('Create Post — shows validation on empty title', (
+      tester,
+    ) async {
       await launchApp(tester);
       await registerAndLogin(tester);
       await tester.tap(find.byKey(const Key('createPostFab')));
@@ -30,8 +31,9 @@ void main() {
       expect(find.text('Title is required'), findsOneWidget);
     });
 
-    testWidgets('Create Post — successfully creates and appears in feed',
-        (tester) async {
+    testWidgets('Create Post — successfully creates and appears in feed', (
+      tester,
+    ) async {
       await launchApp(tester);
       await registerAndLogin(tester);
 
@@ -39,11 +41,17 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.enterText(
-          find.byKey(const Key('titleField')),   'My Test Post');
+        find.byKey(const Key('titleField')),
+        'My Test Post',
+      );
       await tester.enterText(
-          find.byKey(const Key('contentField')), 'This is my test content.');
+        find.byKey(const Key('contentField')),
+        'This is my test content.',
+      );
       await tester.enterText(
-          find.byKey(const Key('tagsField')),    'test, flutter');
+        find.byKey(const Key('tagsField')),
+        'test, flutter',
+      );
       await tester.tap(find.byKey(const Key('submitPostButton')));
       await tester.pumpAndSettle(const Duration(seconds: 3));
 
@@ -51,7 +59,9 @@ void main() {
       expect(find.text('My Test Post'), findsOneWidget);
     });
 
-    testWidgets('Edit Post — pre-fills fields and updates post', (tester) async {
+    testWidgets('Edit Post — pre-fills fields and updates post', (
+      tester,
+    ) async {
       await launchApp(tester);
       await registerAndLogin(tester);
 
@@ -59,9 +69,13 @@ void main() {
       await tester.tap(find.byKey(const Key('createPostFab')));
       await tester.pumpAndSettle();
       await tester.enterText(
-          find.byKey(const Key('titleField')),   'Original Title');
+        find.byKey(const Key('titleField')),
+        'Original Title',
+      );
       await tester.enterText(
-          find.byKey(const Key('contentField')), 'Original content here.');
+        find.byKey(const Key('contentField')),
+        'Original content here.',
+      );
       await tester.tap(find.byKey(const Key('submitPostButton')));
       await tester.pumpAndSettle(const Duration(seconds: 3));
 
@@ -77,7 +91,9 @@ void main() {
 
       // Update
       await tester.enterText(
-          find.byKey(const Key('titleField')), 'Updated Title');
+        find.byKey(const Key('titleField')),
+        'Updated Title',
+      );
       await tester.tap(find.byKey(const Key('updatePostButton')));
       await tester.pumpAndSettle(const Duration(seconds: 3));
 
@@ -92,9 +108,13 @@ void main() {
       await tester.tap(find.byKey(const Key('createPostFab')));
       await tester.pumpAndSettle();
       await tester.enterText(
-          find.byKey(const Key('titleField')),   'Post To Delete');
+        find.byKey(const Key('titleField')),
+        'Post To Delete',
+      );
       await tester.enterText(
-          find.byKey(const Key('contentField')), 'Will be deleted.');
+        find.byKey(const Key('contentField')),
+        'Will be deleted.',
+      );
       await tester.tap(find.byKey(const Key('submitPostButton')));
       await tester.pumpAndSettle(const Duration(seconds: 3));
 
@@ -121,9 +141,13 @@ void main() {
       await tester.tap(find.byKey(const Key('createPostFab')));
       await tester.pumpAndSettle();
       await tester.enterText(
-          find.byKey(const Key('titleField')),   'Likeable Post');
+        find.byKey(const Key('titleField')),
+        'Likeable Post',
+      );
       await tester.enterText(
-          find.byKey(const Key('contentField')), 'Like me please!');
+        find.byKey(const Key('contentField')),
+        'Like me please!',
+      );
       await tester.tap(find.byKey(const Key('submitPostButton')));
       await tester.pumpAndSettle(const Duration(seconds: 3));
 
@@ -142,10 +166,11 @@ void main() {
 
       await tester.tap(find.byKey(const Key('createPostFab')));
       await tester.pumpAndSettle();
+      await tester.enterText(find.byKey(const Key('titleField')), 'Keep Me');
       await tester.enterText(
-          find.byKey(const Key('titleField')),   'Keep Me');
-      await tester.enterText(
-          find.byKey(const Key('contentField')), 'Do not delete.');
+        find.byKey(const Key('contentField')),
+        'Do not delete.',
+      );
       await tester.tap(find.byKey(const Key('submitPostButton')));
       await tester.pumpAndSettle(const Duration(seconds: 3));
 

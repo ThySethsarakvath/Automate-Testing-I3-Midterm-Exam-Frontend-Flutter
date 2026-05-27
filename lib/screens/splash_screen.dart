@@ -32,7 +32,10 @@ class _SplashScreenState extends State<SplashScreen> {
           children: [
             Icon(Icons.people_alt, size: 80, color: Colors.deepPurple),
             SizedBox(height: 16),
-            Text('Social Media', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+            Text(
+              'Social Media',
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            ),
             SizedBox(height: 24),
             CircularProgressIndicator(),
           ],

@@ -7,22 +7,25 @@ class PostProvider extends ChangeNotifier {
 
   PostProvider({required this.postService});
 
-  List<Post> _posts   = [];
-  bool       _loading = false;
-  String?    _error;
+  List<Post> _posts = [];
+  bool _loading = false;
+  String? _error;
 
-  List<Post> get posts     => _posts;
-  bool       get isLoading => _loading;
-  String?    get error     => _error;
+  List<Post> get posts => _posts;
+  bool get isLoading => _loading;
+  String? get error => _error;
 
   Future<void> loadAllPosts() async {
-    _loading = true; _error = null; notifyListeners();
+    _loading = true;
+    _error = null;
+    notifyListeners();
     try {
       _posts = await postService.getAllPosts();
     } catch (e) {
       _error = e.toString().replaceFirst('Exception: ', '');
     }
-    _loading = false; notifyListeners();
+    _loading = false;
+    notifyListeners();
   }
 
   Future<bool> createPost({
@@ -32,7 +35,9 @@ class PostProvider extends ChangeNotifier {
   }) async {
     try {
       final post = await postService.createPost(
-        title: title, content: content, tags: tags,
+        title: title,
+        content: content,
+        tags: tags,
       );
       _posts.insert(0, post);
       notifyListeners();
@@ -52,7 +57,10 @@ class PostProvider extends ChangeNotifier {
   }) async {
     try {
       final updated = await postService.updatePost(
-        id: id, title: title, content: content, tags: tags,
+        id: id,
+        title: title,
+        content: content,
+        tags: tags,
       );
       final idx = _posts.indexWhere((p) => p.id == id);
       if (idx != -1) _posts[idx] = updated;
@@ -93,5 +101,8 @@ class PostProvider extends ChangeNotifier {
     } catch (_) {}
   }
 
-  void clearError() { _error = null; notifyListeners(); }
+  void clearError() {
+    _error = null;
+    notifyListeners();
+  }
 }

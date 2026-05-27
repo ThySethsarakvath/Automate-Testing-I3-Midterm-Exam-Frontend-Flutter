@@ -10,16 +10,18 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  final _formKey      = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>();
   final _usernameCtrl = TextEditingController();
-  final _emailCtrl    = TextEditingController();
+  final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
-  bool  _obscure      = true;
+  bool _obscure = true;
 
   @override
   void dispose() {
-    _usernameCtrl.dispose(); _emailCtrl.dispose();
-    _passwordCtrl.dispose(); super.dispose();
+    _usernameCtrl.dispose();
+    _emailCtrl.dispose();
+    _passwordCtrl.dispose();
+    super.dispose();
   }
 
   Future<void> _submit() async {
@@ -28,7 +30,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     auth.clearError(); // Clear any previous errors
     final ok = await auth.register(
       username: _usernameCtrl.text.trim(),
-      email:    _emailCtrl.text.trim(),
+      email: _emailCtrl.text.trim(),
       password: _passwordCtrl.text,
     );
     if (ok && mounted) {
@@ -49,10 +51,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
               key: _formKey,
               child: Column(
                 children: [
-                  const Icon(Icons.person_add, size: 64, color: Colors.deepPurple),
+                  const Icon(
+                    Icons.person_add,
+                    size: 64,
+                    color: Colors.deepPurple,
+                  ),
                   const SizedBox(height: 8),
-                  const Text('Create Account',
-                      style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Create Account',
+                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 32),
 
                   if (auth.error != null) ...[
@@ -64,8 +72,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(color: Colors.red),
                       ),
-                      child: Text(auth.error!,
-                          style: const TextStyle(color: Colors.red)),
+                      child: Text(
+                        auth.error!,
+                        style: const TextStyle(color: Colors.red),
+                      ),
                     ),
                     const SizedBox(height: 16),
                   ],
@@ -88,7 +98,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                   TextFormField(
                     key: const Key('emailField'),
-                    controller:   _emailCtrl,
+                    controller: _emailCtrl,
                     keyboardType: TextInputType.emailAddress,
                     decoration: const InputDecoration(
                       labelText: 'Email',
@@ -105,14 +115,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                   TextFormField(
                     key: const Key('passwordField'),
-                    controller:  _passwordCtrl,
+                    controller: _passwordCtrl,
                     obscureText: _obscure,
                     decoration: InputDecoration(
                       labelText: 'Password',
                       border: const OutlineInputBorder(),
                       prefixIcon: const Icon(Icons.lock),
                       suffixIcon: IconButton(
-                        icon: Icon(_obscure ? Icons.visibility : Icons.visibility_off),
+                        icon: Icon(
+                          _obscure ? Icons.visibility : Icons.visibility_off,
+                        ),
                         onPressed: () => setState(() => _obscure = !_obscure),
                       ),
                     ),
@@ -134,7 +146,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       child: auth.isLoading
                           ? const CircularProgressIndicator()
-                          : const Text('Register', style: TextStyle(fontSize: 16)),
+                          : const Text(
+                              'Register',
+                              style: TextStyle(fontSize: 16),
+                            ),
                     ),
                   ),
                   const SizedBox(height: 16),

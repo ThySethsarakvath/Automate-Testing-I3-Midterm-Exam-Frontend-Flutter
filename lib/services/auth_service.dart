@@ -6,7 +6,7 @@ import '../models/user.dart';
 
 class AuthService {
   static const _tokenKey = 'auth_token';
-  static const _userKey  = 'auth_user';
+  static const _userKey = 'auth_user';
 
   // ── Register ────────────────────────────────────────────────────────────
   Future<Map<String, dynamic>> register({
@@ -17,7 +17,11 @@ class AuthService {
     final response = await http.post(
       Uri.parse(ApiConfig.register),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'username': username, 'email': email, 'password': password}),
+      body: jsonEncode({
+        'username': username,
+        'email': email,
+        'password': password,
+      }),
     );
 
     final data = jsonDecode(response.body);

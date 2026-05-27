@@ -10,14 +10,16 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _formKey      = GlobalKey<FormState>();
-  final _emailCtrl    = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
-  bool  _obscure      = true;
+  bool _obscure = true;
 
   @override
   void dispose() {
-    _emailCtrl.dispose(); _passwordCtrl.dispose(); super.dispose();
+    _emailCtrl.dispose();
+    _passwordCtrl.dispose();
+    super.dispose();
   }
 
   Future<void> _submit() async {
@@ -25,7 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final auth = context.read<AuthProvider>();
     auth.clearError(); // Clear any previous errors
     final ok = await auth.login(
-      email:    _emailCtrl.text.trim(),
+      email: _emailCtrl.text.trim(),
       password: _passwordCtrl.text,
     );
     if (ok && mounted) {
@@ -46,10 +48,16 @@ class _LoginScreenState extends State<LoginScreen> {
               key: _formKey,
               child: Column(
                 children: [
-                  const Icon(Icons.people_alt, size: 64, color: Colors.deepPurple),
+                  const Icon(
+                    Icons.people_alt,
+                    size: 64,
+                    color: Colors.deepPurple,
+                  ),
                   const SizedBox(height: 8),
-                  const Text('Log In',
-                      style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Log In',
+                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 32),
 
                   // Error banner
@@ -62,8 +70,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(color: Colors.red),
                       ),
-                      child: Text(auth.error!,
-                          style: const TextStyle(color: Colors.red)),
+                      child: Text(
+                        auth.error!,
+                        style: const TextStyle(color: Colors.red),
+                      ),
                     ),
                     const SizedBox(height: 16),
                   ],
@@ -71,9 +81,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   // Email field
                   TextFormField(
                     key: const Key('emailField'),
-                    controller:   _emailCtrl,
+                    controller: _emailCtrl,
                     keyboardType: TextInputType.emailAddress,
-                    decoration:   const InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Email',
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.email),
@@ -89,14 +99,16 @@ class _LoginScreenState extends State<LoginScreen> {
                   // Password field
                   TextFormField(
                     key: const Key('passwordField'),
-                    controller:  _passwordCtrl,
+                    controller: _passwordCtrl,
                     obscureText: _obscure,
                     decoration: InputDecoration(
                       labelText: 'Password',
                       border: const OutlineInputBorder(),
                       prefixIcon: const Icon(Icons.lock),
                       suffixIcon: IconButton(
-                        icon: Icon(_obscure ? Icons.visibility : Icons.visibility_off),
+                        icon: Icon(
+                          _obscure ? Icons.visibility : Icons.visibility_off,
+                        ),
                         onPressed: () => setState(() => _obscure = !_obscure),
                       ),
                     ),
@@ -118,7 +130,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       child: auth.isLoading
                           ? const CircularProgressIndicator()
-                          : const Text('Sign In', style: TextStyle(fontSize: 16)),
+                          : const Text(
+                              'Sign In',
+                              style: TextStyle(fontSize: 16),
+                            ),
                     ),
                   ),
                   const SizedBox(height: 16),

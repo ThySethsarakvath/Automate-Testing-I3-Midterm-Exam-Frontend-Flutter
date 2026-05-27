@@ -48,46 +48,47 @@ class _FeedScreenState extends State<FeedScreen> {
       body: posts.isLoading
           ? const Center(child: CircularProgressIndicator())
           : posts.error != null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.error_outline, size: 48, color: Colors.red),
-                      const SizedBox(height: 8),
-                      Text(posts.error!, key: const Key('feedError')),
-                      TextButton(
-                        onPressed: () => context.read<PostProvider>().loadAllPosts(),
-                        child: const Text('Retry'),
-                      ),
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                  const SizedBox(height: 8),
+                  Text(posts.error!, key: const Key('feedError')),
+                  TextButton(
+                    onPressed: () =>
+                        context.read<PostProvider>().loadAllPosts(),
+                    child: const Text('Retry'),
                   ),
-                )
-              : posts.posts.isEmpty
-                  ? const Center(
-                      child: Text(
-                        'No posts yet.\nTap + to create the first one!',
-                        key: Key('emptyFeed'),
-                        textAlign: TextAlign.center,
-                      ),
-                    )
-                  : RefreshIndicator(
-                      onRefresh: () => context.read<PostProvider>().loadAllPosts(),
-                      child: ListView.builder(
-                        key: const Key('postsList'),
-                        padding: const EdgeInsets.all(8),
-                        itemCount: posts.posts.length,
-                        itemBuilder: (ctx, i) => _PostCard(
-                          post:        posts.posts[i],
-                          currentUserId: auth.user?.id ?? '',
-                        ),
-                      ),
-                    ),
+                ],
+              ),
+            )
+          : posts.posts.isEmpty
+          ? const Center(
+              child: Text(
+                'No posts yet.\nTap + to create the first one!',
+                key: Key('emptyFeed'),
+                textAlign: TextAlign.center,
+              ),
+            )
+          : RefreshIndicator(
+              onRefresh: () => context.read<PostProvider>().loadAllPosts(),
+              child: ListView.builder(
+                key: const Key('postsList'),
+                padding: const EdgeInsets.all(8),
+                itemCount: posts.posts.length,
+                itemBuilder: (ctx, i) => _PostCard(
+                  post: posts.posts[i],
+                  currentUserId: auth.user?.id ?? '',
+                ),
+              ),
+            ),
     );
   }
 }
 
 class _PostCard extends StatelessWidget {
-  final Post   post;
+  final Post post;
   final String currentUserId;
 
   const _PostCard({required this.post, required this.currentUserId});
@@ -110,17 +111,24 @@ class _PostCard extends StatelessWidget {
               // Header
               Row(
                 children: [
-                  CircleAvatar(child: Text(post.authorUsername[0].toUpperCase())),
+                  CircleAvatar(
+                    child: Text(post.authorUsername[0].toUpperCase()),
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(post.authorUsername,
-                            style: const TextStyle(fontWeight: FontWeight.bold)),
+                        Text(
+                          post.authorUsername,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
                         Text(
                           DateFormat('MMM d, y').format(post.createdAt),
-                          style: const TextStyle(fontSize: 12, color: Colors.grey),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
                         ),
                       ],
                     ),
@@ -133,29 +141,38 @@ class _PostCard extends StatelessWidget {
                     ),
                     IconButton(
                       key: Key('deletePost_${post.id}'),
-                      icon: const Icon(Icons.delete, size: 18, color: Colors.red),
+                      icon: const Icon(
+                        Icons.delete,
+                        size: 18,
+                        color: Colors.red,
+                      ),
                       onPressed: () => _confirmDelete(context),
                     ),
                   ],
                 ],
               ),
               const SizedBox(height: 12),
-              Text(post.title,
-                  style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.w600)),
+              Text(
+                post.title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               const SizedBox(height: 4),
-              Text(post.content,
-                  maxLines: 3, overflow: TextOverflow.ellipsis),
+              Text(post.content, maxLines: 3, overflow: TextOverflow.ellipsis),
               const SizedBox(height: 12),
               // Tags
               if (post.tags.isNotEmpty)
                 Wrap(
                   spacing: 6,
                   children: post.tags
-                      .map((t) => Chip(
-                            label: Text(t, style: const TextStyle(fontSize: 11)),
-                            padding: EdgeInsets.zero,
-                          ))
+                      .map(
+                        (t) => Chip(
+                          label: Text(t, style: const TextStyle(fontSize: 11)),
+                          padding: EdgeInsets.zero,
+                        ),
+                      )
                       .toList(),
                 ),
               // Footer: likes & comments
@@ -167,9 +184,10 @@ class _PostCard extends StatelessWidget {
                       isLiked ? Icons.favorite : Icons.favorite_border,
                       color: isLiked ? Colors.red : null,
                     ),
-                    onPressed: () => context
-                        .read<PostProvider>()
-                        .toggleLike(post.id, currentUserId),
+                    onPressed: () => context.read<PostProvider>().toggleLike(
+                      post.id,
+                      currentUserId,
+                    ),
                   ),
                   Text('${post.likes.length}'),
                   const SizedBox(width: 12),

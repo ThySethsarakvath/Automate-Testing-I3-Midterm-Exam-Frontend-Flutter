@@ -10,14 +10,16 @@ class CreatePostScreen extends StatefulWidget {
 }
 
 class _CreatePostScreenState extends State<CreatePostScreen> {
-  final _formKey     = GlobalKey<FormState>();
-  final _titleCtrl   = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final _titleCtrl = TextEditingController();
   final _contentCtrl = TextEditingController();
-  final _tagsCtrl    = TextEditingController();
+  final _tagsCtrl = TextEditingController();
 
   @override
   void dispose() {
-    _titleCtrl.dispose(); _contentCtrl.dispose(); _tagsCtrl.dispose();
+    _titleCtrl.dispose();
+    _contentCtrl.dispose();
+    _tagsCtrl.dispose();
     super.dispose();
   }
 
@@ -30,9 +32,9 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         .toList();
 
     final ok = await context.read<PostProvider>().createPost(
-      title:   _titleCtrl.text.trim(),
+      title: _titleCtrl.text.trim(),
       content: _contentCtrl.text.trim(),
-      tags:    tags,
+      tags: tags,
     );
     if (ok && mounted) context.pop();
   }
@@ -61,8 +63,10 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: Colors.red),
                   ),
-                  child: Text(posts.error!,
-                      style: const TextStyle(color: Colors.red)),
+                  child: Text(
+                    posts.error!,
+                    style: const TextStyle(color: Colors.red),
+                  ),
                 ),
               const SizedBox(height: 12),
               TextFormField(
@@ -73,20 +77,22 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                   border: OutlineInputBorder(),
                 ),
                 validator: (v) => (v == null || v.trim().isEmpty)
-                    ? 'Title is required' : null,
+                    ? 'Title is required'
+                    : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 key: const Key('contentField'),
                 controller: _contentCtrl,
-                maxLines:   6,
+                maxLines: 6,
                 decoration: const InputDecoration(
                   labelText: 'Content *',
                   border: OutlineInputBorder(),
                   alignLabelWithHint: true,
                 ),
                 validator: (v) => (v == null || v.trim().isEmpty)
-                    ? 'Content is required' : null,
+                    ? 'Content is required'
+                    : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -109,7 +115,10 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                   ),
                   child: posts.isLoading
                       ? const CircularProgressIndicator()
-                      : const Text('Publish Post', style: TextStyle(fontSize: 16)),
+                      : const Text(
+                          'Publish Post',
+                          style: TextStyle(fontSize: 16),
+                        ),
                 ),
               ),
             ],

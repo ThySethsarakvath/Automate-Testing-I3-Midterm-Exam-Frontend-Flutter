@@ -11,25 +11,25 @@ class EditPostScreen extends StatefulWidget {
 }
 
 class _EditPostScreenState extends State<EditPostScreen> {
-  final _formKey     = GlobalKey<FormState>();
-  final _titleCtrl   = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final _titleCtrl = TextEditingController();
   final _contentCtrl = TextEditingController();
-  final _tagsCtrl    = TextEditingController();
-  bool  _initialized = false;
+  final _tagsCtrl = TextEditingController();
+  bool _initialized = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_initialized) {
       final posts = context.read<PostProvider>();
-      final post  = posts.posts.firstWhere(
+      final post = posts.posts.firstWhere(
         (p) => p.id == widget.postId,
         orElse: () => posts.posts.first,
       );
-      _titleCtrl.text   = post.title;
+      _titleCtrl.text = post.title;
       _contentCtrl.text = post.content;
-      _tagsCtrl.text    = post.tags.join(', ');
-      _initialized      = true;
+      _tagsCtrl.text = post.tags.join(', ');
+      _initialized = true;
     }
   }
 
@@ -42,10 +42,10 @@ class _EditPostScreenState extends State<EditPostScreen> {
         .toList();
 
     final ok = await context.read<PostProvider>().updatePost(
-      id:      widget.postId,
-      title:   _titleCtrl.text.trim(),
+      id: widget.postId,
+      title: _titleCtrl.text.trim(),
       content: _contentCtrl.text.trim(),
-      tags:    tags,
+      tags: tags,
     );
     if (ok && mounted) context.pop();
   }
@@ -74,17 +74,21 @@ class _EditPostScreenState extends State<EditPostScreen> {
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: Colors.red),
                   ),
-                  child: Text(posts.error!,
-                      style: const TextStyle(color: Colors.red)),
+                  child: Text(
+                    posts.error!,
+                    style: const TextStyle(color: Colors.red),
+                  ),
                 ),
               TextFormField(
                 key: const Key('titleField'),
                 controller: _titleCtrl,
                 decoration: const InputDecoration(
-                  labelText: 'Title *', border: OutlineInputBorder(),
+                  labelText: 'Title *',
+                  border: OutlineInputBorder(),
                 ),
                 validator: (v) => (v == null || v.trim().isEmpty)
-                    ? 'Title is required' : null,
+                    ? 'Title is required'
+                    : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -92,11 +96,13 @@ class _EditPostScreenState extends State<EditPostScreen> {
                 controller: _contentCtrl,
                 maxLines: 6,
                 decoration: const InputDecoration(
-                  labelText: 'Content *', border: OutlineInputBorder(),
+                  labelText: 'Content *',
+                  border: OutlineInputBorder(),
                   alignLabelWithHint: true,
                 ),
                 validator: (v) => (v == null || v.trim().isEmpty)
-                    ? 'Content is required' : null,
+                    ? 'Content is required'
+                    : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -118,7 +124,10 @@ class _EditPostScreenState extends State<EditPostScreen> {
                   ),
                   child: posts.isLoading
                       ? const CircularProgressIndicator()
-                      : const Text('Update Post', style: TextStyle(fontSize: 16)),
+                      : const Text(
+                          'Update Post',
+                          style: TextStyle(fontSize: 16),
+                        ),
                 ),
               ),
             ],

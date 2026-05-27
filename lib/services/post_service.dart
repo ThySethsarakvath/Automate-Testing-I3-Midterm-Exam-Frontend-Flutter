@@ -29,7 +29,10 @@ class PostService {
   // ── Get feed ──────────────────────────────────────────────────────────
   Future<List<Post>> getFeed() async {
     final headers = await _authHeaders();
-    final response = await http.get(Uri.parse(ApiConfig.feed), headers: headers);
+    final response = await http.get(
+      Uri.parse(ApiConfig.feed),
+      headers: headers,
+    );
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
       return data.map((p) => Post.fromJson(p)).toList();
@@ -74,9 +77,9 @@ class PostService {
   }) async {
     final headers = await _authHeaders();
     final body = <String, dynamic>{};
-    if (title != null)   body['title']   = title;
+    if (title != null) body['title'] = title;
     if (content != null) body['content'] = content;
-    if (tags != null)    body['tags']    = tags;
+    if (tags != null) body['tags'] = tags;
 
     final response = await http.patch(
       Uri.parse('${ApiConfig.posts}/$id'),
@@ -109,7 +112,8 @@ class PostService {
       Uri.parse('${ApiConfig.posts}/$id/like'),
       headers: headers,
     );
-    if (response.statusCode == 200) return Post.fromJson(jsonDecode(response.body));
+    if (response.statusCode == 200)
+      return Post.fromJson(jsonDecode(response.body));
     throw Exception('Failed to like post');
   }
 
@@ -119,7 +123,8 @@ class PostService {
       Uri.parse('${ApiConfig.posts}/$id/like'),
       headers: headers,
     );
-    if (response.statusCode == 200) return Post.fromJson(jsonDecode(response.body));
+    if (response.statusCode == 200)
+      return Post.fromJson(jsonDecode(response.body));
     throw Exception('Failed to unlike post');
   }
 
