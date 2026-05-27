@@ -51,7 +51,7 @@ jobs:
         run: flutter test --coverage
       
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           files: ./coverage/lcov.info
           flags: unittests
@@ -78,7 +78,7 @@ jobs:
         run: flutter build apk --release
       
       - name: Upload APK to artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: android-apk
           path: build/app/outputs/flutter-apk/app-release.apk
@@ -105,7 +105,7 @@ jobs:
         run: flutter build web --release
       
       - name: Upload Web to artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: web-build
           path: build/web/
@@ -132,7 +132,7 @@ jobs:
         run: flutter build ios --release --no-codesign
       
       - name: Upload iOS build to artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ios-build
           path: build/ios/iphoneos/Runner.app/
