@@ -1,0 +1,68 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  lint_and_check:
+    name: Lint and Static Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.11.1'
+          channel: 'stable'
+      
+      - name: Get Flutter dependencies
+        run: flutter pub get
+      
+      - name: Check for formatting issues
+        run: dart format --output=none --set-exit-if-changed lib/ test/ integration_test/
+      
+      - name: Run Flutter Analyze
+        run: flutter analyze --no-fatal-infos
+      
+      - name: Check for unused files
+        run: |
+          # List all unused files (requires build_runner)
+          echo "Checking for unused code..."
+          find lib -name "*.dart" -type f | while read file; do
+            if ! grep -r "$(basename "$file" .dart)" lib test integration_test --exclude-dir=.dart_tool > /dev/null 2>&1; then
+              echo "⚠️ Potentially unused file: $file"
+            fi
+          done
+
+  dependency_check:
+    name: Check Dependencies
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.11.1'
+          channel: 'stable'
+      
+      - name: Get Flutter dependencies
+        run: flutter pub get
+      
+      - name: Check for deprecated dependencies
+        run: |
+          echo "Checking for dependency updates..."
+          flutter pub outdated --no-dev-dependencies || echo "Some packages may have updates available"
+      
+      - name: Check pubspec.yaml
+        run: |
+          echo "Validating pubspec.yaml..."
+          dart pub get --dry-run
