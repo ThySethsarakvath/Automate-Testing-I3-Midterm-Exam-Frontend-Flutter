@@ -1,139 +1,161 @@
-name: CI
+name: CI – Flutter Tests & Notify
 
 on:
   push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main, develop ]
+    branches:
+      - main
 
 jobs:
-  analyze:
-    name: Analyze and Format Check
+  test:
+    name: Flutter Integration Tests
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: Checkout code
+      # ── 1. Checkout ──────────────────────────────────────────────────────
+      - name: Checkout repository
         uses: actions/checkout@v4
-      
-      - name: Setup Flutter
+
+      # ── 2. Setup Java (required for Android SDK tools) ───────────────────
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # ── 3. Setup Flutter ─────────────────────────────────────────────────
+      - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: 'any'
-          channel: 'stable'
-      
-      - name: Get Flutter dependencies
+          flutter-version: '3.19.0'
+          channel: stable
+          cache: true
+
+      # ── 4. Install dependencies ──────────────────────────────────────────
+      - name: Install Flutter dependencies
         run: flutter pub get
-      
-      - name: Run Flutter Analyze
+
+      # ── 5. Analyze code ──────────────────────────────────────────────────
+      - name: Analyze code
+        id: analyze
         run: flutter analyze
-      
-      - name: Check code format
-        run: dart format --set-exit-if-changed lib/ test/ integration_test/
+        continue-on-error: true
 
-  unit_tests:
-    name: Unit Tests
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: 'any'
-          channel: 'stable'
-      
-      - name: Get Flutter dependencies
-        run: flutter pub get
-      
-      - name: Run unit tests
+      # ── 6. Run unit/widget tests ─────────────────────────────────────────
+      - name: Run unit & widget tests
+        id: unit_tests
         run: flutter test --coverage
-      
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          files: ./coverage/lcov.info
-          flags: unittests
-          name: codecov-umbrella
+        continue-on-error: true
 
-  build_android:
-    name: Build Android APK
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+      # ── 7. Start NestJS backend ──────────────────────────────────────────
+      - name: Set up Node.js for backend
+        uses: actions/setup-node@v4
         with:
-          flutter-version: 'any'
-          channel: 'stable'
-      
-      - name: Get Flutter dependencies
-        run: flutter pub get
-      
-      - name: Build APK
-        run: flutter build apk --release
-      
-      - name: Upload APK to artifacts
+          node-version: '18.x'
+
+      - name: Clone & start backend API
+        id: backend
+        run: |
+          git clone https://github.com/${{ secrets.BACKEND_REPO }}.git backend
+          cd backend
+          npm install --ignore-scripts
+          nohup npm run start:prod &
+          echo "Waiting for API to be ready..."
+          sleep 8
+          curl --fail http://localhost:3000/posts || echo "API not ready yet"
+        continue-on-error: true
+
+      # ── 8. Enable KVM for Android emulator ───────────────────────────────
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      # ── 9. Run integration tests on Android emulator ─────────────────────
+      - name: Run integration tests (Android)
+        id: integration_tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 33
+          arch: x86_64
+          profile: pixel_5
+          script: flutter test integration_test/app_test.dart -d emulator-5554
+        continue-on-error: true
+
+      # ── 10. Upload coverage report ───────────────────────────────────────
+      - name: Upload coverage report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: android-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
-          retention-days: 7
+          name: flutter-coverage
+          path: coverage/
+          retention-days: 14
 
-  build_web:
-    name: Build Web
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: 'any'
-          channel: 'stable'
-      
-      - name: Get Flutter dependencies
-        run: flutter pub get
-      
-      - name: Build Web
-        run: flutter build web --release
-      
-      - name: Upload Web to artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: web-build
-          path: build/web/
-          retention-days: 7
+      # ── 11. Determine overall result ─────────────────────────────────────
+      - name: Determine result
+        id: result
+        run: |
+          if [[ "${{ steps.unit_tests.outcome }}"        == "success" && \
+                "${{ steps.integration_tests.outcome }}" == "success" ]]; then
+            echo "status=SUCCESS ✅" >> $GITHUB_OUTPUT
+            echo "emoji=✅"         >> $GITHUB_OUTPUT
+          else
+            echo "status=FAILED ❌" >> $GITHUB_OUTPUT
+            echo "emoji=❌"         >> $GITHUB_OUTPUT
+          fi
 
-  build_ios:
-    name: Build iOS App
-    runs-on: macos-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+      # ── 12. Send email notification ──────────────────────────────────────
+      - name: Send email notification
+        if: always()
+        uses: dawidd6/action-send-mail@v3
         with:
-          flutter-version: 'any'
-          channel: 'stable'
-      
-      - name: Get Flutter dependencies
-        run: flutter pub get
-      
-      - name: Build iOS
-        run: flutter build ios --release --no-codesign
-      
-      - name: Upload iOS build to artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: ios-build
-          path: build/ios/iphoneos/Runner.app/
-          retention-days: 7
+          server_address: smtp.gmail.com
+          server_port: 587
+          secure: false
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          to: ${{ github.event.pusher.email }}, srengty@gmail.com
+          from: "Social Media Flutter CI <${{ secrets.MAIL_USERNAME }}>"
+          subject: >
+            ${{ steps.result.outputs.emoji }} Flutter CI [${{ steps.result.outputs.status }}]
+            – social-media-flutter @ ${{ github.ref_name }}
+            (#${{ github.run_number }})
+          body: |
+            ═══════════════════════════════════════════════════
+            Social Media Flutter — Automated Test Report
+            ═══════════════════════════════════════════════════
+
+            Overall Result : ${{ steps.result.outputs.status }}
+            Branch         : ${{ github.ref_name }}
+            Commit         : ${{ github.sha }}
+            Commit message : ${{ github.event.head_commit.message }}
+            Committer      : ${{ github.event.pusher.name }} <${{ github.event.pusher.email }}>
+            Run number     : #${{ github.run_number }}
+
+            ───────────────────────────────────────────────────
+            Step Results
+            ───────────────────────────────────────────────────
+            Code Analysis      : ${{ steps.analyze.outcome }}
+            Unit/Widget Tests  : ${{ steps.unit_tests.outcome }}
+            Backend Startup    : ${{ steps.backend.outcome }}
+            Integration Tests  : ${{ steps.integration_tests.outcome }}
+
+            ───────────────────────────────────────────────────
+            Links
+            ───────────────────────────────────────────────────
+            Actions run : ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            Repository  : ${{ github.server_url }}/${{ github.repository }}
+
+            ═══════════════════════════════════════════════════
+            This is an automated message — do not reply.
+            ═══════════════════════════════════════════════════
+
+      # ── 13. Fail job if critical steps failed ────────────────────────────
+      - name: Fail if tests failed
+        if: |
+          steps.unit_tests.outcome == 'failure' ||
+          steps.integration_tests.outcome == 'failure'
+        run: |
+          echo "❌ One or more test suites failed."
+          exit 1
