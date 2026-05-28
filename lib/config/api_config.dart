@@ -1,11 +1,16 @@
 class ApiConfig {
-  // Change this to your deployed URL when not running locally
-  static const String baseUrl = 'http://10.0.2.2:3000';
+  // On Android emulator, localhost of the HOST machine is 10.0.2.2
+  // Set ENV variable API_BASE_URL to override in CI
+  static String get baseUrl {
+    const env = String.fromEnvironment('API_BASE_URL', defaultValue: '');
+    if (env.isNotEmpty) return env;
+    return 'http://10.0.2.2:3000'; // emulator → host machine
+  }
 
-  static const String register = '$baseUrl/auth/register';
-  static const String login = '$baseUrl/auth/login';
-  static const String posts = '$baseUrl/posts';
-  static const String feed = '$baseUrl/posts/feed';
-  static const String users = '$baseUrl/users';
-  static const String me = '$baseUrl/users/me';
+  static String get register => '$baseUrl/auth/register';
+  static String get login    => '$baseUrl/auth/login';
+  static String get posts    => '$baseUrl/posts';
+  static String get feed     => '$baseUrl/posts/feed';
+  static String get users    => '$baseUrl/users';
+  static String get me       => '$baseUrl/users/me';
 }

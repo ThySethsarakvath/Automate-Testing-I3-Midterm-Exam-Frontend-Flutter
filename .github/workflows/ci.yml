@@ -57,14 +57,35 @@ jobs:
         run: |
           git clone https://github.com/${{ secrets.BACKEND_REPO }}.git backend
           cd backend
+
+          # Install dependencies
           npm install --ignore-scripts
-          npm run build
-          nohup node dist/main.js &
-          echo "Waiting for API..."
+
+          # Fix permissions on all binaries in node_modules/.bin
+          chmod +x node_modules/.bin/*
+
+          # Build using the local nestjs cli directly
+          node node_modules/@nestjs/cli/bin/nest.js build
+
+          # Start in background
+          nohup node dist/main.js > ../backend.log 2>&1 &
+
+          # Poll until API responds (max 30s)
+          echo "Waiting for API to be ready..."
           for i in {1..15}; do
-            curl -s http://localhost:3000/posts && echo "API ready!" && break
+            if curl -sf http://localhost:3000/posts > /dev/null; then
+              echo "✅ API is ready"
+              break
+            fi
+            echo "Attempt $i — not ready, waiting 2s..."
             sleep 2
           done
+
+          # Print log if API never responded
+          if ! curl -sf http://localhost:3000/posts > /dev/null; then
+            echo "❌ API failed to start. Last logs:"
+            cat ../backend.log
+          fi
         continue-on-error: true
 
       # ── 8. Enable KVM ─────────────────────────────────────────────────────
