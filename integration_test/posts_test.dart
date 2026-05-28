@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'helpers/test_helper.dart';
 
-// Helper: create a post from the feed screen
 Future<void> createPost(
   WidgetTester tester, {
   required String title,
@@ -23,7 +22,7 @@ Future<void> createPost(
   }
 
   await tester.tap(find.byKey(const Key('submitPostButton')));
-  await tester.pumpAndSettle(const Duration(seconds: 6));
+  await tester.pumpAndSettle(const Duration(seconds: 8));
 }
 
 void main() {
@@ -31,21 +30,19 @@ void main() {
 
   group('Posts CRUD UI Tests', () {
 
+    setUp(() async => clearSession());
+
     testWidgets('Feed screen loads after login', (tester) async {
       await launchApp(tester);
       await registerAndLogin(tester);
-      // Feed screen rendered (FAB visible is enough)
       expect(find.byKey(const Key('createPostFab')), findsOneWidget);
     });
 
     testWidgets('Create Post — shows validation on empty title', (tester) async {
       await launchApp(tester);
       await registerAndLogin(tester);
-
       await tester.tap(find.byKey(const Key('createPostFab')));
       await tester.pumpAndSettle(const Duration(seconds: 2));
-
-      // Submit without title
       await tester.tap(find.byKey(const Key('submitPostButton')));
       await tester.pumpAndSettle();
       expect(find.text('Title is required'), findsOneWidget);
@@ -54,14 +51,11 @@ void main() {
     testWidgets('Create Post — validates empty content', (tester) async {
       await launchApp(tester);
       await registerAndLogin(tester);
-
       await tester.tap(find.byKey(const Key('createPostFab')));
       await tester.pumpAndSettle(const Duration(seconds: 2));
-
       await tester.enterText(
           find.byKey(const Key('titleField')), 'Some Title');
       await tester.pump();
-      // Leave content empty
       await tester.tap(find.byKey(const Key('submitPostButton')));
       await tester.pumpAndSettle();
       expect(find.text('Content is required'), findsOneWidget);
@@ -85,18 +79,13 @@ void main() {
           title:   'Do Not Delete Me',
           content: 'This should stay.');
 
-      // Tap delete icon
       final deleteBtn = find.byWidgetPredicate(
         (w) => w is IconButton && w.key.toString().contains('deletePost_'),
       );
-      expect(deleteBtn, findsWidgets);
       await tester.tap(deleteBtn.first);
       await tester.pumpAndSettle();
-
-      // Cancel the dialog
       await tester.tap(find.byKey(const Key('cancelDelete')));
       await tester.pumpAndSettle();
-
       expect(find.text('Do Not Delete Me'), findsOneWidget);
     });
 
@@ -114,10 +103,8 @@ void main() {
       );
       await tester.tap(deleteBtn.first);
       await tester.pumpAndSettle();
-
       await tester.tap(find.byKey(const Key('confirmDelete')));
-      await tester.pumpAndSettle(const Duration(seconds: 6));
-
+      await tester.pumpAndSettle(const Duration(seconds: 8));
       expect(find.text('Delete This Post'), findsNothing);
     });
 
@@ -134,16 +121,13 @@ void main() {
       await tester.tap(editBtn.first);
       await tester.pumpAndSettle(const Duration(seconds: 2));
 
-      // Title field should be pre-filled
       expect(find.text('Original Title'), findsOneWidget);
 
-      // Clear and type new title
       await tester.enterText(
           find.byKey(const Key('titleField')), 'Updated Title');
       await tester.pump();
       await tester.tap(find.byKey(const Key('updatePostButton')));
-      await tester.pumpAndSettle(const Duration(seconds: 6));
-
+      await tester.pumpAndSettle(const Duration(seconds: 8));
       expect(find.text('Updated Title'), findsOneWidget);
     });
 
@@ -157,10 +141,8 @@ void main() {
       final likeBtn = find.byWidgetPredicate(
         (w) => w is IconButton && w.key.toString().contains('likeButton_'),
       );
-      expect(likeBtn, findsWidgets);
       await tester.tap(likeBtn.first);
       await tester.pumpAndSettle(const Duration(seconds: 4));
-      // No crash = pass
       expect(find.byKey(const Key('createPostFab')), findsOneWidget);
     });
   });

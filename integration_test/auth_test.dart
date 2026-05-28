@@ -8,6 +8,9 @@ void main() {
 
   group('Authentication UI Tests', () {
 
+    // Clear session before every test in this group
+    setUp(() async => clearSession());
+
     testWidgets('Login screen shows required fields', (tester) async {
       await launchApp(tester);
       expect(find.byKey(const Key('emailField')),    findsOneWidget);
@@ -17,7 +20,6 @@ void main() {
 
     testWidgets('Login shows validation error on empty submit', (tester) async {
       await launchApp(tester);
-      // Tap login without filling anything — pure local validation, no API call
       await tester.tap(find.byKey(const Key('loginButton')));
       await tester.pumpAndSettle();
       expect(find.text('Email is required'), findsOneWidget);
@@ -56,7 +58,7 @@ void main() {
       await goToRegister(tester);
       await tester.enterText(find.byKey(const Key('usernameField')), 'ab');
       await tester.enterText(
-          find.byKey(const Key('emailField')),    'user@test.com');
+          find.byKey(const Key('emailField')),    'u@test.com');
       await tester.enterText(
           find.byKey(const Key('passwordField')), 'password123');
       await tester.tap(find.byKey(const Key('registerButton')));
