@@ -154,7 +154,7 @@ jobs:
           secure: false
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
-          to: ${{ github.event.pusher.email }}, test@gmail.com
+          to: ${{ github.event.pusher.email }}, srengty@gmail.com
           from: "Social Media Flutter CI <${{ secrets.MAIL_USERNAME }}>"
           subject: >
             ${{ steps.result.outputs.emoji }} Flutter CI [${{ steps.result.outputs.status }}]
