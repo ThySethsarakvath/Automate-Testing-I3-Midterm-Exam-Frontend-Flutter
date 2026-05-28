@@ -58,21 +58,21 @@ jobs:
           git clone https://github.com/${{ secrets.BACKEND_REPO }}.git backend
           cd backend
 
-          # Install all deps normally (no --ignore-scripts so tsc works)
+          # Install all deps normally
           npm install
 
           # Build — fail loudly if it errors
           node node_modules/@nestjs/cli/bin/nest.js build
           
-          # Verify dist was actually created
-          if [ ! -f dist/main.js ]; then
-            echo "❌ Build failed — dist/main.js not found"
+          # 1. Update verification path 🎯
+          if [ ! -f dist/apps/api/main.js ]; then
+            echo "❌ Build failed — dist/apps/api/main.js not found"
             exit 1
           fi
           echo "✅ Build succeeded"
 
-          # Start in background
-          nohup node dist/main.js > ../backend.log 2>&1 &
+          # 2. Update background startup path 🎯
+          nohup node dist/apps/api/main.js > ../backend.log 2>&1 &
 
           # Poll until API responds (max 60s)
           echo "Waiting for API to be ready..."
@@ -85,7 +85,7 @@ jobs:
             sleep 2
           done
 
-          # Final check — print logs if still not up
+          # 3. Final check — print logs if still not up
           if ! curl -sf http://localhost:3000/posts > /dev/null; then
             echo "❌ API failed to start. Full logs:"
             cat ../backend.log
@@ -148,7 +148,7 @@ jobs:
           secure: false
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
-          to: ${{ github.event.pusher.email }}, srengty@gmail.com
+          to: ${{ github.event.pusher.email }}, test@gmail.com
           from: "Social Media Flutter CI <${{ secrets.MAIL_USERNAME }}>"
           subject: >
             ${{ steps.result.outputs.emoji }} Flutter CI [${{ steps.result.outputs.status }}]
