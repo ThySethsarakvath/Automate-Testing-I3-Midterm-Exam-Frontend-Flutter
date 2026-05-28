@@ -7,93 +7,74 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('Authentication UI Tests', () {
-    testWidgets('Login screen shows email and password fields', (tester) async {
+
+    testWidgets('Login screen shows required fields', (tester) async {
       await launchApp(tester);
-      expect(find.byKey(const Key('emailField')), findsOneWidget);
+      expect(find.byKey(const Key('emailField')),    findsOneWidget);
       expect(find.byKey(const Key('passwordField')), findsOneWidget);
-      expect(find.byKey(const Key('loginButton')), findsOneWidget);
+      expect(find.byKey(const Key('loginButton')),   findsOneWidget);
     });
 
-    testWidgets('Login shows error on wrong credentials', (tester) async {
+    testWidgets('Login shows validation error on empty submit', (tester) async {
       await launchApp(tester);
-      await tester.enterText(
-        find.byKey(const Key('emailField')),
-        'wrong@test.com',
-      );
-      await tester.enterText(
-        find.byKey(const Key('passwordField')),
-        'wrongpass',
-      );
-      await tester.tap(find.byKey(const Key('loginButton')));
-      await tester.pumpAndSettle(const Duration(seconds: 3));
-
-      expect(find.byKey(const Key('errorBanner')), findsOneWidget);
-    });
-
-    testWidgets('Login shows validation error on empty fields', (tester) async {
-      await launchApp(tester);
+      // Tap login without filling anything — pure local validation, no API call
       await tester.tap(find.byKey(const Key('loginButton')));
       await tester.pumpAndSettle();
-
       expect(find.text('Email is required'), findsOneWidget);
+    });
+
+    testWidgets('Login shows validation error on invalid email', (tester) async {
+      await launchApp(tester);
+      await tester.enterText(
+          find.byKey(const Key('emailField')), 'not-an-email');
+      await tester.tap(find.byKey(const Key('loginButton')));
+      await tester.pumpAndSettle();
+      expect(find.text('Enter a valid email'), findsOneWidget);
+    });
+
+    testWidgets('Login shows error banner on wrong credentials', (tester) async {
+      await launchApp(tester);
+      await tester.enterText(
+          find.byKey(const Key('emailField')),    'nobody@test.com');
+      await tester.enterText(
+          find.byKey(const Key('passwordField')), 'wrongpassword');
+      await tester.tap(find.byKey(const Key('loginButton')));
+      await tester.pumpAndSettle(const Duration(seconds: 8));
+      expect(find.byKey(const Key('errorBanner')), findsOneWidget);
     });
 
     testWidgets('Navigate to Register screen', (tester) async {
       await launchApp(tester);
-      // Ensure login button is visible before trying to tap register
-      expect(find.byKey(const Key('loginButton')), findsOneWidget);
       await tester.tap(find.byKey(const Key('goToRegister')));
-      await tester.pumpAndSettle(const Duration(seconds: 3));
-
+      await tester.pumpAndSettle();
       expect(find.byKey(const Key('registerButton')), findsOneWidget);
-      expect(find.byKey(const Key('usernameField')), findsOneWidget);
+      expect(find.byKey(const Key('usernameField')),  findsOneWidget);
     });
 
     testWidgets('Register shows validation on short username', (tester) async {
       await launchApp(tester);
-      // Ensure login button is visible before trying to tap register
-      expect(find.byKey(const Key('loginButton')), findsOneWidget);
-      await tester.tap(find.byKey(const Key('goToRegister')));
-      await tester.pumpAndSettle(const Duration(seconds: 3));
-      // Verify register screen is now visible
-      expect(find.byKey(const Key('registerButton')), findsOneWidget);
-
+      await goToRegister(tester);
       await tester.enterText(find.byKey(const Key('usernameField')), 'ab');
       await tester.enterText(
-        find.byKey(const Key('emailField')),
-        'user@test.com',
-      );
+          find.byKey(const Key('emailField')),    'user@test.com');
       await tester.enterText(
-        find.byKey(const Key('passwordField')),
-        'password123',
-      );
+          find.byKey(const Key('passwordField')), 'password123');
       await tester.tap(find.byKey(const Key('registerButton')));
       await tester.pumpAndSettle();
-
       expect(find.text('Minimum 3 characters'), findsOneWidget);
     });
 
     testWidgets('Register shows validation on short password', (tester) async {
       await launchApp(tester);
-      // Ensure login button is visible before trying to tap register
-      expect(find.byKey(const Key('loginButton')), findsOneWidget);
-      await tester.tap(find.byKey(const Key('goToRegister')));
-      await tester.pumpAndSettle(const Duration(seconds: 3));
-      // Verify register screen is now visible
-      expect(find.byKey(const Key('registerButton')), findsOneWidget);
-
+      await goToRegister(tester);
       await tester.enterText(
-        find.byKey(const Key('usernameField')),
-        'validuser',
-      );
+          find.byKey(const Key('usernameField')), 'validuser');
       await tester.enterText(
-        find.byKey(const Key('emailField')),
-        'valid@test.com',
-      );
-      await tester.enterText(find.byKey(const Key('passwordField')), '123');
+          find.byKey(const Key('emailField')),    'valid@test.com');
+      await tester.enterText(
+          find.byKey(const Key('passwordField')), '123');
       await tester.tap(find.byKey(const Key('registerButton')));
       await tester.pumpAndSettle();
-
       expect(find.text('Minimum 6 characters'), findsOneWidget);
     });
 
@@ -107,7 +88,7 @@ void main() {
       await launchApp(tester);
       await registerAndLogin(tester);
       await tester.tap(find.byKey(const Key('logoutButton')));
-      await tester.pumpAndSettle(const Duration(seconds: 2));
+      await tester.pumpAndSettle(const Duration(seconds: 4));
       expect(find.byKey(const Key('loginButton')), findsOneWidget);
     });
   });

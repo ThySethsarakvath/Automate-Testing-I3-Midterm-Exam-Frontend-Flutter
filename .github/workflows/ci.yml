@@ -43,7 +43,7 @@ jobs:
       # ── 6. Run unit/widget tests ─────────────────────────────────────────
       - name: Run unit & widget tests
         id: unit_tests
-        run: flutter test --coverage
+        run: flutter test
         continue-on-error: true
 
       # ── 7. Start NestJS backend ──────────────────────────────────────────
@@ -58,13 +58,16 @@ jobs:
           git clone https://github.com/${{ secrets.BACKEND_REPO }}.git backend
           cd backend
           npm install --ignore-scripts
-          nohup npm run start:prod &
-          echo "Waiting for API to be ready..."
-          sleep 8
-          curl --fail http://localhost:3000/posts || echo "API not ready yet"
+          npm run build
+          nohup node dist/main.js &
+          echo "Waiting for API..."
+          for i in {1..15}; do
+            curl -s http://localhost:3000/posts && echo "API ready!" && break
+            sleep 2
+          done
         continue-on-error: true
 
-      # ── 8. Enable KVM for Android emulator ───────────────────────────────
+      # ── 8. Enable KVM ─────────────────────────────────────────────────────
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
@@ -72,7 +75,8 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      # ── 9. Run integration tests on Android emulator ─────────────────────
+      # ── 9. Integration tests on Android emulator ──────────────────────────
+      # 10.0.2.2 is the emulator's alias for the host machine (where API runs)
       - name: Run integration tests (Android)
         id: integration_tests
         uses: reactivecircus/android-emulator-runner@v2
@@ -80,7 +84,10 @@ jobs:
           api-level: 33
           arch: x86_64
           profile: pixel_5
-          script: flutter test integration_test/app_test.dart -d emulator-5554
+          script: >
+            flutter test integration_test/app_test.dart
+            -d emulator-5554
+            --dart-define=API_BASE_URL=http://10.0.2.2:3000
         continue-on-error: true
 
       # ── 10. Upload coverage report ───────────────────────────────────────
